@@ -32,9 +32,9 @@ public class EvaluateHands {
 		// FLUSH
 		for(int suit: allSuits) {
 			if(countOccurrences(allSuits, suit) == 5) {
-				int[] nums = new int[7];
+				int[] nums = new int[p.length];
 				// Find highest card number within flush
-				for(int i = 0; i < 7; i++) {
+				for(int i = 0; i < p.length; i++) {
 					if(p[i].getRight() == suit) {
 						nums[i] = p[i].getLeft();
 					}
