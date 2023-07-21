@@ -8,8 +8,7 @@ import java.util.Stack;
 
 import org.apache.commons.lang3.tuple.Pair;
 
-//Pair data type
-
+// A card is represented as two numbers, 2-14 for duce through ace and 1-4 representing clubs/diamonds/hearts/spades
 public class NewDeck {	
 	Stack<Pair<Integer,Integer>> stack;
 	
@@ -23,15 +22,12 @@ public class NewDeck {
 		
 		stack = new Stack<>();
 		stack.addAll(list);
-		
-		for(int i = 0; i < 50; i++) {
-			Pair<Integer,Integer> val = stack.get(i);
-			System.out.println(val.getLeft() + " " + val.getRight());
-		}
 	}
 	
-	public int draw() {
-		return -1;
+	public Pair<Integer,Integer> draw() {
+		Pair<Integer,Integer> card = stack.pop();
+		System.out.println(stack.size());
+		return card;
 	}	
 	
 	public void add() {
