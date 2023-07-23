@@ -12,7 +12,7 @@ import org.apache.commons.lang3.tuple.Pair;
 public class NewDeck {	
 	Stack<Pair<Integer,Integer>> stack;
 	
-	public void create() {
+	public Stack<Pair<Integer,Integer>> create() {
 		stack = new Stack<>();
 		add();
 		
@@ -22,13 +22,25 @@ public class NewDeck {
 		
 		stack = new Stack<>();
 		stack.addAll(list);
+		
+		return stack;
 	}
 	
-	public Pair<Integer,Integer> draw() {
+	/*
+	public ArrayList<Pair<Integer,Integer>> drawHand() {
+		ArrayList<Pair<Integer,Integer>> cards = new ArrayList<Pair<Integer,Integer>>(); 
+		Pair<Integer,Integer> pair1 = stack.pop();
+		Pair<Integer,Integer> pair2 = stack.pop();
+		cards.add(pair1);
+		cards.add(pair2);
+		return cards;
+	}	
+	
+	public Pair<Integer,Integer> drawOne() {
 		Pair<Integer,Integer> card = stack.pop();
-		System.out.println(stack.size());
 		return card;
 	}	
+	*/
 	
 	public void add() {
 		for(int i = 1; i < 5; i++) {

@@ -14,6 +14,10 @@ public class Player {
 		this.cards = cards;
 	}
 	
+	public boolean checkBet(int bet) {
+		return (bet <= getChips() ? true : false);
+	}
+		
 	public void betChips(int amount) {
 		chips -= amount;
 	}
@@ -38,7 +42,10 @@ public class Player {
 		return cards;
 	}
 	
-	public void drawCards(ArrayList<Pair<Integer,Integer>> newCards) {
+	public void setCards(Pair<Integer,Integer> card1, Pair<Integer,Integer> card2) {
+		ArrayList<Pair<Integer,Integer>> newCards = new ArrayList<>();
+		newCards.add(card1);
+		newCards.add(card2);
 		cards = newCards;
 	}
 	

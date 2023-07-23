@@ -9,8 +9,8 @@ public class EvaluateHands {
 	
 	// Returns points of hand and number of hand. Ace High Card = (1,14) or Straight Top Card 10 = (5,10) 
 	// First two Pair<>'s are players cards, helpful for determining high card.
-	public Pair<Integer,Integer> findHand(Pair<Integer, Integer>[] p) {
-		
+	public Pair<Integer,Integer> findHand(ArrayList<Pair<Integer,Integer>> p) {
+
 		ArrayList<Integer> allNumbers = getNumbers(p);
 		ArrayList<Integer> allSuits = getSuits(p);
 		// The String holds hand name. If two players had a pair. The Integer parameter would be used to see which is the higher pair.
@@ -32,11 +32,11 @@ public class EvaluateHands {
 		// FLUSH
 		for(int suit: allSuits) {
 			if(countOccurrences(allSuits, suit) == 5) {
-				int[] nums = new int[p.length];
+				int[] nums = new int[p.size()];
 				// Find highest card number within flush
-				for(int i = 0; i < p.length; i++) {
-					if(p[i].getRight() == suit) {
-						nums[i] = p[i].getLeft();
+				for(int i = 0; i < p.size(); i++) {
+					if(p.get(i).getRight() == suit) {
+						nums[i] = p.get(i).getLeft();
 					}
 				}
 				int largest = 0;
@@ -98,15 +98,14 @@ public class EvaluateHands {
 	
 	
 	
-	
     // Finds all numbers for 7 cards entered as parameter
-	public ArrayList<Integer> getNumbers(Pair<Integer,Integer>[] p) {
+	public ArrayList<Integer> getNumbers(ArrayList<Pair<Integer,Integer>> p) {
 		ArrayList<Integer> nums = new ArrayList<>();
 		for(Pair<Integer,Integer> num: p) nums.add(num.getLeft());
 		return nums;
 	}
     // Finds all numbers for 7 suit's entered as parameter
-	public ArrayList<Integer> getSuits(Pair<Integer,Integer>[] p) {
+	public ArrayList<Integer> getSuits(ArrayList<Pair<Integer,Integer>> p) {
 		ArrayList<Integer> nums = new ArrayList<>();
 		for(Pair<Integer,Integer> num: p) nums.add(num.getRight());
 		return nums;	

@@ -23,17 +23,16 @@ public class Index {
 		
 		players = new ArrayList<Player>(numberOfPlayers);
 		
+		// Assign and object for each player in the game.
 		for(int i = 0; i < numberOfPlayers; i++) {
 	        ArrayList<Pair<Integer, Integer>> empty = new ArrayList<>(List.of(Pair.of(0, 0), Pair.of(0, 0)));
 			Player person = new Player(1000, empty);
 			players.add(person);
 		}
-		
-		// Creates 52 cards with two integers set as Pair<>. 2-14 representing 2-Ace and 1-4 representing clubs/diamonds/hearts/spades.
-		NewDeck deck = new NewDeck();
-		deck.create();
-		
-		
+	
+		startGame game = new startGame(numberOfPlayers, players);
+		System.out.println(game.start() ? "Thanks for playing! Nice Win!" : "Better luck next time!");
+		stdin.close();
 		
 		EvaluateHands cards = new EvaluateHands();
         Pair<Integer, Integer>[] card = new Pair[2];
@@ -50,7 +49,6 @@ public class Index {
         	It returns the highest hand value as the first int and the highest card number in the hand being the second.
          	High card 5 == (1,5)		Straight 6 7 8 9 10 == (5,10) */
         
-		System.out.println(cards.findHand(card)); 
-		stdin.close();
+		//System.out.println(cards.findHand(card)); 
 	}
 }
