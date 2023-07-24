@@ -34,61 +34,63 @@ public class startGame {
 		EvaluateHands calc = new EvaluateHands();
 		Scanner stdin = new Scanner(System.in);
 		deckRef = new NewDeck();	
-		for(int i = 0; i < 7; i++) {					// Fill cards with blanks
+		for(int i = 0; i < 7; i++) {															// Fill cards with blanks
 	        cardsInPlay.add(Pair.of(0,0));
 		}
-		
-		// Once a player runs out, will stay false 
-		boolean[] inOrOut = new boolean[players.size()];
-		for(boolean i : inOrOut) i = true;
-		
-		while(players.size() > 1) {						// Til one player left.
-			gameStep = getGameStep(gameStep);			// Determine cards in play for round around cirlce
-			
-			
-			for(int i = 0; i < players.size(); i++) {	// Go around the circle
-				if(inOrOut[i] == true) {				// False if player is out of chips or is out for round
-					if(turnIndex != 0) {				// Robot move
-						ArrayList<Pair<Integer,Integer>> temp = players.get(turnIndex).getCards();
-						cardsInPlay.set(0, temp.get(0));
-						cardsInPlay.set(1, temp.get(1));
-						int cnt = 0;
-						for(Pair<Integer,Integer> j : cardsInPlay) {
-							if(j.getLeft() == 0) cnt++;
-						}
-						int robotBet = players.get(i).decide(calc.findHand(cardsInPlay),cnt); // What the robot is comfortable betting.
-						
-						if(roundBet <= robotBet) {
-							roundBet += robotBet;
-							potSize += robotBet;
-						} else {
-							inOrOut[i] = false;			// Robot folded
-						}
-					} else {
-						int chipsLeft = players.get(0).getChips();
-						System.out.println("Type fold or how much you would like to bet. You have " + chipsLeft + " chips left.");
-						System.out.println("If you want to bet, you must bet, " + roundBet + " or more.");
-						String choice = stdin.next();
-						if(choice.equals("fold")) {
-							inOrOut[0] = false;
-						} else {
-							roundBet += Integer.parseInt(choice);
-							potSize += Integer.parseInt(choice);
-						}
-					}
-				} 
-
-				}
-			}
-			
-		}
-		
-		
-		
-		
-		return true; // Win
+		return true; 																			// Win
 	}
 	
+	public void printCards() {
+		String set1 = "You have an ";
+		String set2 = "The cards dealth are an ";
+		ArrayList<Pair<Integer,Integer>> cardSet = players.get(0).getCards();
+		cardsInPlay.set(0, cardSet.get(0));
+		cardsInPlay.set(1, cardSet.get(1));
+		
+
+		for(int j = 0; j < cardsInPlay.size(); j++) {
+			set1 += valuesOfNumbers(cardsInPlay.get(j).getLeft(), cardsInPlay.get(j).getRight());
+		}
+
+		for(int j = 0; j < cardsInPlay.size(); j++) {
+			set2 += valuesOfNumbers(cardsInPlay.get(j).getLeft(), cardsInPlay.get(j).getRight());
+		}
+
+		if(cardsInPlay.get(2).getLeft() == 0) {
+			System.out.println("No other cards have been dealt yet");
+		} else {
+			System.out.println(set2);
+		}
+		System.out.println(set1);
+	}
+	public String valuesOfNumbers(int num, int suit) {
+		String set = "";
+		if(num < 11) {
+			set += num;
+		} else {
+			switch(num) {
+			case 11: set += "Jack";
+				break;
+			case 12: set += "Queen";
+				break;
+			case 13: set += "King";
+				break;
+			case 14: set += "Ace";
+				break;
+			}
+		}
+		
+		switch(suit) {
+			case 1: set += " of Clubs";
+				break;
+			case 2: set += " of Diamonds";
+				break;
+			case 3: set += " of Hearts";
+				break;
+			case 4: set += " of Spades";
+		}
+		return set;
+	}
 	// Add pot chips to winner and remove players with no chips left
 	public void endRound(Player winner) {
 		winner.winChips(potSize);
