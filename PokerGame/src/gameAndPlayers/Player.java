@@ -7,11 +7,20 @@ import org.apache.commons.lang3.tuple.Pair;
 
 public class Player {
 	int chips;
+	boolean inOrOut;
 	ArrayList<Pair<Integer,Integer>> cards;
 	
 	public Player(int chips, ArrayList<Pair<Integer,Integer>> cards) {
 		this.chips = chips;
 		this.cards = cards;
+	}
+	
+	public void setInOrOut(boolean inOrOut) {
+		this.inOrOut = inOrOut;
+	}
+	
+	public boolean inOrOut() {
+		return inOrOut;
 	}
 	
 	public boolean checkBet(int bet) {

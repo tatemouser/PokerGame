@@ -11,33 +11,149 @@ import cardLogic.*;
 public class startGame {
 	private int numberOfPlayers;
 	private ArrayList<Player> players;
-	private int gameStep; 
 	private Stack<Pair<Integer,Integer>> deck;
 	private ArrayList<Pair<Integer, Integer>> cardsInPlay;
 	private NewDeck deckRef;
-	private int turnIndex;
 	private int potSize;
-	private int roundBet;
+	private int roundPotSize;
+	private int turnIndex;
 	
 	public startGame(int numberOfPlayers, ArrayList<Player> players) {
 		this.numberOfPlayers = numberOfPlayers;
 		this.players = players;
-		this.gameStep = 0;
-		this.turnIndex = 0;
 		this.potSize = 0;
-		this.roundBet = 0;
+		this.roundPotSize = 0;
+		this.turnIndex = 0;
 		cardsInPlay = new ArrayList<>(7);
 	}
 
 	public boolean start() {
 		cardsInPlay = new ArrayList<>(7);
-		EvaluateHands calc = new EvaluateHands();
 		Scanner stdin = new Scanner(System.in);
-		deckRef = new NewDeck();	
-		for(int i = 0; i < 7; i++) {															// Fill cards with blanks
-	        cardsInPlay.add(Pair.of(0,0));
+		deckRef = new NewDeck();
+		deck = deckRef.create();
+		
+		for(Player p: players) p.setInOrOut(true);					// Make everyone in.
+		for(Player p: players) p.setCards(deck.pop(), deck.pop()); 	// Give cards
+		cardsInPlay.set(0,Pair.of(1,1));							// Initialize cardsInPlay with dummy cards
+		cardsInPlay.set(1,Pair.of(1,1));							
+		
+		
+		
+		while(players.get(0).getChips() >= 0 && numberOfPlayers != 1) {	
+			// Begin Round - New Deal - Until one person remains.
+			// Each iteration of the loop should change whoIsIn or influence pot size.
+			while(whoIsIn() > 1) {	
+				// No cards dealt.
+				if(cardsInPlay.get(2).getLeft() == 0) { 
+					goAround();
+					cardsInPlay.set(2, deck.pop());
+					cardsInPlay.set(3, deck.pop());
+					cardsInPlay.set(4, deck.pop());
+					
+				// 3 cards flipped.
+				} else if(cardsInPlay.get(5).getLeft() == 0) { 
+					goAround();
+					cardsInPlay.set(5, deck.pop());
+					
+				// 4 cards flipped.
+				} else if(cardsInPlay.get(6).getLeft() == 0) { 
+					goAround();
+					cardsInPlay.set(6, deck.pop());
+					
+				// 5 cards flipped.
+				} else if(cardsInPlay.get(6).getLeft() != 0) { 
+					goAround();
+					
+					// Should exit loop since no more cards will be dealt, therefore no need for setting cards in cardsInPlay array.
+				} else {
+				    System.err.println("Issue Drawing Cards.");
+				    throw new RuntimeException("Unexpected state reached! Check the conditions.");
+				}
+				/*System.out.println("eliminate all?");
+				String s = stdin.next();
+				for(int i = 0; i < players.size()-1; i++) {
+					players.get(i).setInOrOut(false);
+				}*/
+				
+			}
+			// End Round - Reset
+			// New start with incremented turnIndex.
+			turnIndex = (turnIndex == players.size()-1) ? 0 : turnIndex++;
+			// Payout winner.
+			for(Player p: players) if(p.inOrOut == true) p.winChips(potSize);
+			// Remove players out.
+			for(Player p: players) {
+				if(p.getChips() <= 0) players.remove(p);
+			}
+			// Determine if game needs to continue based off main player chip count and players left
+			if(players.get(0).getChips() <= 0) return false;
+			if(players.size() == 1) return true;
+			// Reset Pot
+			potSize = 0;
+			// Everyone back in.
+			for(Player p: players) p.setInOrOut(true);
+			// Collect cards to shuffle (cardsInPlay (0,0) )
+			for (int i = 2; i < cardsInPlay.size(); i++) {
+			    cardsInPlay.set(i, Pair.of(0, 0));
+			}
+			// Shuffle deck.
+			deck = deckRef.create();
+			// Re-deal cards
+			for(Player p: players) {
+				p.setCards(deck.pop(), deck.pop());
+			}
+			
+			System.out.println("next round?");
+			String continueGame = stdin.next();
 		}
-		return true; 																			// Win
+	
+		return players.get(0).getChips() > 0 ? true : false;															
+	}
+	
+	
+	// Changes inOrOut or changes pot.
+	public void goAround() {
+		EvaluateHands calc = new EvaluateHands();
+		// Go around once. 
+		for(int i = 0; i < players.size(); i++) {
+			if(turnIndex == 0) { // Main player turn.
+				//PLAYER MOVE
+				turnIndex = (turnIndex == players.size()-1) ? 0 : turnIndex++;
+				
+			} else { // Robot turn , Infer turn may be on someone that is out for the round, proceed to skip.
+				// Get Robot Cards
+				ArrayList<Pair<Integer,Integer>> botCards = players.get(turnIndex).getCards();
+				cardsInPlay.set(0, botCards.get(0));
+				cardsInPlay.set(1, botCards.get(1));
+				
+				// Find best hand and number of cards used.
+				Pair<Integer,Integer> bestHand = calc.findHand(cardsInPlay);
+				int numberOfCardsInPlay = 0;
+				for(Pair<Integer,Integer> p : cardsInPlay) if(p.getLeft() != 0) numberOfCardsInPlay++;
+				
+				// Input found information to get chip amount decicion.
+				int decision = players.get(turnIndex).decide(bestHand, numberOfCardsInPlay);
+				
+				// Fold
+				if(decision == -1 || decision < roundPotSize || players.get(i).getChips() < roundPotSize) { //Redundancy
+					players.get(i).setInOrOut(false);
+				// Bet
+				} else {
+					roundPotSize = decision;
+					players.get(i).betChips(decision);
+				}
+				turnIndex = (turnIndex == players.size()-1) ? 0 : turnIndex++;
+			}
+		}
+	}
+	
+	
+	
+	public int whoIsIn() {
+		int playerCnt = 0;
+		for(Player p : players) if(p.inOrOut) playerCnt++;	
+		return playerCnt;
 	}
 	
 	public void printCards() {
@@ -63,6 +179,7 @@ public class startGame {
 		}
 		System.out.println(set1);
 	}
+	
 	public String valuesOfNumbers(int num, int suit) {
 		String set = "";
 		if(num < 11) {
@@ -90,50 +207,5 @@ public class startGame {
 			case 4: set += " of Spades";
 		}
 		return set;
-	}
-	// Add pot chips to winner and remove players with no chips left
-	public void endRound(Player winner) {
-		winner.winChips(potSize);
-		for(Player p: players) if(p.getChips() <= 0) players.remove(p);
-	}
-	
-	public int getGameStep(int gameStep) { 
-		// DETERMINE GAME STEP, (DRAW -> FLOP -> TURN -> RIVER) or (0 -> 1 -> 2 -> 3)
-		if(gameStep == 0) {
-			Pair<Integer,Integer> zeros = Pair.of(0,0);			// Remove last round cards
-			for(int i = 2; i < 7; i++) cardsInPlay.add(i,zeros);
-			deck = deckRef.create();							// Shuffle Cards
-			
-			for(Player p: players) {
-				p.setCards(deck.pop(),deck.pop());				// Give two cards to each player
-			}
-			gameStep++;
-			
-		} else if(gameStep == 1) {
-			cardsInPlay.add(2, deck.pop());						//Draw 3 cards for the flop
-			cardsInPlay.add(3, deck.pop());
-			cardsInPlay.add(4, deck.pop());
-			gameStep++;
-			
-		} else if(gameStep == 2) {
-			cardsInPlay.add(5, deck.pop());						// Draw 1 card for the turn
-			gameStep++;
-			
-		} else if(gameStep == 3) {	
-			cardsInPlay.add(6, deck.pop());						// Draw 1 card for the river
-			gameStep = 0;
-		}
-		
-		return gameStep;
-	}
-	
-	public int howManyCardsInPlay(ArrayList<Pair<Integer, Integer>> cardsInPlay) {
-		int cardCnt = 0;
-		for(Pair<Integer,Integer> card: cardsInPlay) {
-			if(card.getLeft() == 0) {
-				cardCnt++;
-			}
-		}
-		return cardCnt;
 	}
 }
