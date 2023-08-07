@@ -31,7 +31,7 @@ public class EvaluateHands {
 		}
 		// FLUSH
 		for(int suit: allSuits) {
-			if(countOccurrences(allSuits, suit) == 5) {
+			if(countOccurrences(allSuits, suit) == 5 && suit != 0) {
 				int[] nums = new int[p.size()];
 				// Find highest card number within flush
 				for(int i = 0; i < p.size(); i++) {

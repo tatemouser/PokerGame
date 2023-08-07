@@ -142,14 +142,14 @@ public class startGame {
 					roundPotSize = bet;
 					System.out.println("Nice Bet of " + bet + ".");
 				}
-				System.out.println("Turn index is " + turnIndex);
+				
 				if(turnIndex == players.size()-1) {
 					turnIndex = 0;
 				} else turnIndex++;
-				System.out.println("Turn index is " + turnIndex);
 				
 			} else { // Robot turn , Infer turn may be on someone that is out for the round, proceed to skip.
-				System.out.println("Robot Turn");
+				
+				System.out.println("Player " + (i+1) +" Turn");
 				// Get Robot Cards
 				ArrayList<Pair<Integer,Integer>> botCards = players.get(turnIndex).getCards();
 				cardsInPlay.set(0, botCards.get(0));
@@ -166,12 +166,12 @@ public class startGame {
 				// Fold
 				if(decision == -1 || decision < roundPotSize || players.get(i).getChips() < roundPotSize) { //Redundancy
 					players.get(i).setInOrOut(false);
-					System.out.println("Player " + i + " has folded.");
+					System.out.println("Player " + (i+1) + " has folded.");
 				// Bet
 				} else {
 					roundPotSize = decision;
 					players.get(i).betChips(decision);
-					System.out.println("Player " + i + " has wagered " + decision + " chips. Setting the pot size to " + roundPotSize + " chips.");
+					System.out.println("Player " + (i+1) + " has wagered " + decision + " chips. Setting the pot size to " + roundPotSize + " chips.");
 				}
 				if(turnIndex == players.size()-1) {
 					turnIndex = 0;
@@ -193,16 +193,19 @@ public class startGame {
 	
 	public void printCards() {
 		String set1 = "You have an ";
-		String set2 = "The cards dealth are an ";
+		String set2 = "The cards dealt are a ";
 		ArrayList<Pair<Integer,Integer>> cardSet = players.get(0).getCards();
 		cardsInPlay.set(0, cardSet.get(0));
 		cardsInPlay.set(1, cardSet.get(1));
 		
 		set1 += valuesOfNumbers(cardsInPlay.get(0).getLeft(), cardsInPlay.get(0).getRight());
 		set1 += " and a " + valuesOfNumbers(cardsInPlay.get(1).getLeft(), cardsInPlay.get(1).getRight());
-
-		for(int j = 0; j < cardsInPlay.size(); j++) {
-			set2 += valuesOfNumbers(cardsInPlay.get(j).getLeft(), cardsInPlay.get(j).getRight());
+		
+		
+		for(int j = 2; j < cardsInPlay.size(); j++) {
+			if(cardsInPlay.get(j).getLeft() != 0) {
+				set2 += "(" + valuesOfNumbers(cardsInPlay.get(j).getLeft(), cardsInPlay.get(j).getRight()) + ")" + " ";
+			}
 		}
 
 		if(cardsInPlay.get(2).getLeft() == 0) {

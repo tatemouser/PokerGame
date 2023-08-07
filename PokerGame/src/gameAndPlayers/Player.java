@@ -62,14 +62,18 @@ public class Player {
 	public int decide(Pair<Integer,Integer> bestHand, int totalCards) {
 		int left = bestHand.getLeft(); 		// Hand value
 		int right = bestHand.getRight();	// High card in hand
-
+		
 		// DRAW
 		if(totalCards == 2) {
+			System.out.println("Looking for condition");
+			System.out.println("Left: " + left + "\t" + "Right: " + right);
 			if(left == 1 && right >= 10) {
 				// High card >= 10
+				System.out.println("Rob condition 1");
 				return randomPlay(50,50) ? 50 : 25;
 			} 
 			if(left == 2) {
+				System.out.println("Rob condition 2");
 				if(right < 10) {
 					// Pair < 10
 					return randomPlay(60,40) ? randomAmount(50,100) : 20;
