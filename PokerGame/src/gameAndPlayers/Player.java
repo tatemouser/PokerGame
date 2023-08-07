@@ -65,15 +65,11 @@ public class Player {
 		
 		// DRAW
 		if(totalCards == 2) {
-			System.out.println("Looking for condition");
-			System.out.println("Left: " + left + "\t" + "Right: " + right);
 			if(left == 1 && right >= 10) {
 				// High card >= 10
-				System.out.println("Rob condition 1");
 				return randomPlay(50,50) ? 50 : 25;
 			} 
 			if(left == 2) {
-				System.out.println("Rob condition 2");
 				if(right < 10) {
 					// Pair < 10
 					return randomPlay(60,40) ? randomAmount(50,100) : 20;
@@ -133,7 +129,7 @@ public class Player {
 			}
 		}
 		
-		return -1;
+		return 0;
 	}
 	
 	// If another player calls all in. If straight or greater 70% chance of all int, Pair/2Pair/3ofKind have 30% chance of all in.

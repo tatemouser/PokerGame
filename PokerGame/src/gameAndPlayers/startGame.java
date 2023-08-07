@@ -7,7 +7,8 @@ import java.util.Stack;
 import org.apache.commons.lang3.tuple.Pair;
 
 import cardLogic.*; 
-
+// DO NOT ALLOW LOWER BETS THAN POT SIZE / MAIN PLAYER AND ROBOT
+// ADD CHECKING
 public class startGame {
 	private int numberOfPlayers;
 	private ArrayList<Player> players;
@@ -43,7 +44,8 @@ public class startGame {
 			// Begin Round - New Deal - Until one person remains.
 			// Each iteration of the loop should change whoIsIn or influence pot size.
 			while(whoIsIn() > 1) {	
-				
+				// ADD ASKING TO MATCH OR FOLD.
+
 				// No cards dealt.
 				if(cardsInPlay.get(2).getLeft() == 0) { 
 					goAround();
@@ -65,12 +67,16 @@ public class startGame {
 				} else if(cardsInPlay.get(6).getLeft() != 0) { 
 					goAround();
 					
-					// Should exit loop since no more cards will be dealt, therefore no need for setting cards in cardsInPlay array.
+				// Should exit loop since no more cards will be dealt, therefore no need for setting cards in cardsInPlay array.
 				} else {
 				    System.err.println("Issue Drawing Cards.");
 				    throw new RuntimeException("Unexpected state reached! Check the conditions.");
 				}
-				potSize += roundPotSize;
+				
+				// Get count of players still in, this is used to multiply pot size since players must have met wager to still be in.
+				int cnt = 0;
+				for(Player p: players) if(p.inOrOut()) cnt++;
+				potSize += roundPotSize * cnt;
 				/*System.out.println("eliminate all?");
 				String s = stdin.next();
 				for(int i = 0; i < players.size()-1; i++) {
@@ -132,22 +138,24 @@ public class startGame {
 				System.out.println("The pot right now is " + roundPotSize + ". You have " + players.get(i).getChips() + " chips left.");
 				System.out.println("Type \"Fold\" or an amount you would like to bet.");
 				decision = stdin.nextLine();
-				int bet = Integer.parseInt(decision);
-
+				
 				if(decision.equals("Fold") || decision.equals("fold")) {
 					players.get(i).setInOrOut(false);
 					System.out.println("Nice Fold.");
-				} else if(players.get(i).getChips() >= bet) {
-					players.get(i).betChips(bet);
-					roundPotSize = bet;
-					System.out.println("Nice Bet of " + bet + ".");
+				} else {
+					int bet = Integer.parseInt(decision);
+					if(players.get(i).getChips() >= bet) {
+						players.get(i).betChips(bet);
+						roundPotSize = bet;
+						System.out.println("Nice Bet of " + bet + ".");
+					}
 				}
 				
 				if(turnIndex == players.size()-1) {
 					turnIndex = 0;
 				} else turnIndex++;
 				
-			} else { // Robot turn , Infer turn may be on someone that is out for the round, proceed to skip.
+			} else if(players.get(turnIndex).inOrOut){ // Robot turn , Infer turn may be on someone that is out for the round, proceed to skip.
 				
 				System.out.println("Player " + (i+1) +" Turn");
 				// Get Robot Cards
@@ -175,7 +183,13 @@ public class startGame {
 				}
 				if(turnIndex == players.size()-1) {
 					turnIndex = 0;
-				} else turnIndex++;			
+				} else turnIndex++;		
+				
+			} else {
+				System.out.println("Skip player " + turnIndex);
+				if(turnIndex == players.size()-1) {
+					turnIndex = 0;
+				} else turnIndex++;	
 			}
 			// Start and stop going around
 			System.out.println("Type continue to go to the next player.");
