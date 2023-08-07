@@ -67,15 +67,15 @@ public class Player {
 		if(totalCards == 2) {
 			if(left == 1 && right >= 10) {
 				// High card >= 10
-				return randomPlay(50,50) ? 50 : -1;
+				return randomPlay(50,50) ? 50 : 25;
 			} 
 			if(left == 2) {
 				if(right < 10) {
 					// Pair < 10
-					return randomPlay(60,40) ? randomAmount(50,100) : -1;
+					return randomPlay(60,40) ? randomAmount(50,100) : 20;
 				} else {
 					// Pair >= 10
-					return randomPlay(80,20) ? randomAmount(50,200) : -1;
+					return randomPlay(80,20) ? randomAmount(50,200) : 20;
 				}
 			}
 		}

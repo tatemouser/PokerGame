@@ -43,6 +43,7 @@ public class startGame {
 			// Begin Round - New Deal - Until one person remains.
 			// Each iteration of the loop should change whoIsIn or influence pot size.
 			while(whoIsIn() > 1) {	
+				
 				// No cards dealt.
 				if(cardsInPlay.get(2).getLeft() == 0) { 
 					goAround();
@@ -69,6 +70,7 @@ public class startGame {
 				    System.err.println("Issue Drawing Cards.");
 				    throw new RuntimeException("Unexpected state reached! Check the conditions.");
 				}
+				potSize += roundPotSize;
 				/*System.out.println("eliminate all?");
 				String s = stdin.next();
 				for(int i = 0; i < players.size()-1; i++) {
@@ -78,9 +80,13 @@ public class startGame {
 			}
 			// End Round - Reset
 			// New start with incremented turnIndex.
-			turnIndex = (turnIndex == players.size()-1) ? 0 : turnIndex++;
+			if(turnIndex == players.size()-1) {
+				turnIndex = 0;
+			} else turnIndex++;
 			// Payout winner.
-			for(Player p: players) if(p.inOrOut == true) p.winChips(potSize);
+			for(Player p: players) if(p.inOrOut == true) { 
+				p.winChips(potSize);
+			}
 			// Remove players out.
 			for(Player p: players) {
 				if(p.getChips() <= 0) players.remove(p);
@@ -118,6 +124,7 @@ public class startGame {
 		EvaluateHands calc = new EvaluateHands();
 		// Go around once. 
 		for(int i = 0; i < players.size(); i++) {
+			gameDevCardView();
 			if(turnIndex == 0) { // Main player turn.
 				printCards();
 				// ADD CHECK USER INPUT FOR VALID INPUT
@@ -129,14 +136,20 @@ public class startGame {
 
 				if(decision.equals("Fold") || decision.equals("fold")) {
 					players.get(i).setInOrOut(false);
+					System.out.println("Nice Fold.");
 				} else if(players.get(i).getChips() >= bet) {
 					players.get(i).betChips(bet);
 					roundPotSize = bet;
+					System.out.println("Nice Bet of " + bet + ".");
 				}
-				turnIndex = (turnIndex == players.size()-1) ? 0 : turnIndex++;
-				stdin.close();
+				System.out.println("Turn index is " + turnIndex);
+				if(turnIndex == players.size()-1) {
+					turnIndex = 0;
+				} else turnIndex++;
+				System.out.println("Turn index is " + turnIndex);
 				
 			} else { // Robot turn , Infer turn may be on someone that is out for the round, proceed to skip.
+				System.out.println("Robot Turn");
 				// Get Robot Cards
 				ArrayList<Pair<Integer,Integer>> botCards = players.get(turnIndex).getCards();
 				cardsInPlay.set(0, botCards.get(0));
@@ -160,8 +173,13 @@ public class startGame {
 					players.get(i).betChips(decision);
 					System.out.println("Player " + i + " has wagered " + decision + " chips. Setting the pot size to " + roundPotSize + " chips.");
 				}
-				turnIndex = (turnIndex == players.size()-1) ? 0 : turnIndex++;
+				if(turnIndex == players.size()-1) {
+					turnIndex = 0;
+				} else turnIndex++;			
 			}
+			// Start and stop going around
+			System.out.println("Type continue to go to the next player.");
+			String val = stdin.nextLine();
 		}
 	}
 	
@@ -180,10 +198,8 @@ public class startGame {
 		cardsInPlay.set(0, cardSet.get(0));
 		cardsInPlay.set(1, cardSet.get(1));
 		
-
-		for(int j = 0; j < cardsInPlay.size(); j++) {
-			set1 += valuesOfNumbers(cardsInPlay.get(j).getLeft(), cardsInPlay.get(j).getRight());
-		}
+		set1 += valuesOfNumbers(cardsInPlay.get(0).getLeft(), cardsInPlay.get(0).getRight());
+		set1 += " and a " + valuesOfNumbers(cardsInPlay.get(1).getLeft(), cardsInPlay.get(1).getRight());
 
 		for(int j = 0; j < cardsInPlay.size(); j++) {
 			set2 += valuesOfNumbers(cardsInPlay.get(j).getLeft(), cardsInPlay.get(j).getRight());
@@ -224,5 +240,63 @@ public class startGame {
 			case 4: set += " of Spades";
 		}
 		return set;
+	}
+	
+	
+	// Prints all game information
+	public void gameDevCardView() {
+        System.out.println("\n");
+		
+		// Print who is in or out.
+		String playersIn = "";
+		String playersInRound = "";
+		String playersOutRound = "";
+		for(int i = 0; i < players.size(); i++) playersIn += i + " ";
+		for(int i = 0; i < players.size(); i++) {
+			 if(players.get(i).inOrOut()) {
+				 playersInRound += i + " ";
+			 } else playersOutRound += i + " ";
+		}
+		
+		System.out.println("Players in Game: " + playersIn + "\t" + "Player in for Round: " + playersInRound + "\t" + "Player out for Round: " + playersOutRound);
+		
+		// Print game status and cards dealt.
+		if(cardsInPlay.get(2).getLeft() == 0) { 
+			System.out.println("No cards have been dealt to the middle.");
+			
+		} else if(cardsInPlay.get(5).getLeft() == 0) { 
+			String flop = "3 Cards have been dealt: ";
+			for(int i = 2; i < cardsInPlay.size()-2; i++) flop += valuesOfNumbers(cardsInPlay.get(i).getLeft(), cardsInPlay.get(i).getRight()) + " ";
+			
+		} else if(cardsInPlay.get(6).getLeft() == 0) { 
+			String turn = "4 Cards have been dealt: ";
+			for(int i = 2; i < cardsInPlay.size()-1; i++) turn += valuesOfNumbers(cardsInPlay.get(i).getLeft(), cardsInPlay.get(i).getRight()) + " ";
+			
+		} else if(cardsInPlay.get(6).getLeft() != 0) {
+			String river = "All 5 Cards have been dealt: ";
+			for(int i = 2; i < cardsInPlay.size(); i++) river += valuesOfNumbers(cardsInPlay.get(i).getLeft(), cardsInPlay.get(i).getRight()) + " ";
+			
+		}
+		
+		// Print pot and round chips.
+		System.out.println("Overall Pot: " + potSize + "\t" + "Round Pot: " + roundPotSize);
+		
+		// Print player information
+		for(int i = 0; i < players.size(); i++) {
+			String playerCards = "";
+			if(players.get(i).inOrOut()) {
+				
+				playerCards += "Player " + i + ": CARDS - ";
+				ArrayList<Pair<Integer,Integer>> temp = players.get(i).getCards();
+				playerCards += valuesOfNumbers(temp.get(0).getLeft(), temp.get(0).getRight());
+				playerCards += " and a " + valuesOfNumbers(temp.get(1).getLeft(), temp.get(1).getRight()) + "\t";
+				
+				playerCards += "CHIPS - " + players.get(i).getChips();
+				System.out.println(playerCards);
+			}
+		}
+		
+        System.out.println("\n");
+
 	}
 }
