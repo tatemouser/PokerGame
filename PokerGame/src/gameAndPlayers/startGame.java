@@ -8,7 +8,8 @@ import org.apache.commons.lang3.tuple.Pair;
 
 import cardLogic.*; 
 // DO NOT ALLOW LOWER BETS THAN POT SIZE / MAIN PLAYER AND ROBOT
-// ADD CHECKING
+// ADD CHECKING CONSOLE INPUTS
+// PRINT WIN/LOSE FOR ROUND
 public class startGame {
 	private int numberOfPlayers;
 	private ArrayList<Player> players;
@@ -29,6 +30,7 @@ public class startGame {
 	}
 
 	public boolean start() {
+		EvaluateHands calc = new EvaluateHands();
 		cardsInPlay = new ArrayList<>(7);
 		Scanner stdin = new Scanner(System.in);
 		deckRef = new NewDeck();
@@ -49,6 +51,7 @@ public class startGame {
 				// No cards dealt.
 				if(cardsInPlay.get(2).getLeft() == 0) { 
 					goAround();
+					players.get(0).setRoundBet(0);
 					cardsInPlay.set(2, deck.pop());
 					cardsInPlay.set(3, deck.pop());
 					cardsInPlay.set(4, deck.pop());
@@ -56,17 +59,41 @@ public class startGame {
 				// 3 cards flipped.
 				} else if(cardsInPlay.get(5).getLeft() == 0) { 
 					goAround();
+					players.get(0).setRoundBet(0);
 					cardsInPlay.set(5, deck.pop());
 					
 				// 4 cards flipped.
 				} else if(cardsInPlay.get(6).getLeft() == 0) { 
 					goAround();
+					players.get(0).setRoundBet(0);
 					cardsInPlay.set(6, deck.pop());
 					
 				// 5 cards flipped.
 				} else if(cardsInPlay.get(6).getLeft() != 0) { 
 					goAround();
-					
+					players.get(0).setRoundBet(0);
+					// Find winning hand since no more betting can be done.
+					int winnerIndex = 0;
+					Pair<Integer, Integer> winningHand = Pair.of(0,0);
+					for(int j = 0; j < players.size(); j++) {
+						ArrayList<Pair<Integer,Integer>> temp = players.get(j).getCards();
+						cardsInPlay.set(0, temp.get(0));
+						cardsInPlay.set(1, temp.get(1));
+						Pair<Integer,Integer> playerHand = calc.findHand(cardsInPlay);
+						if(playerHand.getLeft() > winningHand.getLeft()) {
+							winningHand = playerHand;
+							winnerIndex = j;
+						} else if(playerHand.getLeft() == winningHand.getLeft() && playerHand.getRight() > winningHand.getRight()) {
+							winningHand = playerHand;
+							winnerIndex = j;
+						}
+					}
+					// Make only winner still in.
+					for(int j = 0; j < players.size(); j++) {
+						if(j != winnerIndex) {
+							players.get(j).setInOrOut(false);
+						}
+					}
 				// Should exit loop since no more cards will be dealt, therefore no need for setting cards in cardsInPlay array.
 				} else {
 				    System.err.println("Issue Drawing Cards.");
@@ -74,9 +101,11 @@ public class startGame {
 				}
 				
 				// Get count of players still in, this is used to multiply pot size since players must have met wager to still be in.
+				System.out.println("jsdnakjsad");
 				int cnt = 0;
 				for(Player p: players) if(p.inOrOut()) cnt++;
 				potSize += roundPotSize * cnt;
+				roundPotSize = 0;
 				/*System.out.println("eliminate all?");
 				String s = stdin.next();
 				for(int i = 0; i < players.size()-1; i++) {
@@ -146,6 +175,7 @@ public class startGame {
 					int bet = Integer.parseInt(decision);
 					if(players.get(i).getChips() >= bet) {
 						players.get(i).betChips(bet);
+						players.get(i).setRoundBet(bet);
 						roundPotSize = bet;
 						System.out.println("Nice Bet of " + bet + ".");
 					}
@@ -172,14 +202,37 @@ public class startGame {
 				int decision = players.get(turnIndex).decide(bestHand, numberOfCardsInPlay);
 				
 				// Fold
-				if(decision == -1 || decision < roundPotSize || players.get(i).getChips() < roundPotSize) { //Redundancy
+				if((roundPotSize != 0) &&  decision == -1 || decision < roundPotSize || players.get(i).getChips() < roundPotSize) { //Redundancy
 					players.get(i).setInOrOut(false);
 					System.out.println("Player " + (i+1) + " has folded.");
 				// Bet
 				} else {
 					roundPotSize = decision;
-					players.get(i).betChips(decision);
-					System.out.println("Player " + (i+1) + " has wagered " + decision + " chips. Setting the pot size to " + roundPotSize + " chips.");
+					// Check to see if other players would like to match the larger bet before continuing
+					if(roundPotSize != 0) {
+						players.get(i).betChips(decision);
+						System.out.println("Player " + (i+1) + " has wagered " + decision + " chips. Setting the pot size to " + roundPotSize + " chips.");
+						
+						boolean correctInput = false;
+						while(!correctInput) {
+							System.out.println("To stay in, you must bet atleast " + decision + " Type yes to continue or no to fold.");
+							String answer = stdin.nextLine();
+							
+							if(answer.equals("yes") || answer.equals("Yes")) {
+								players.get(0).betChips(decision);
+								players.get(0).winChips(players.get(0).getRoundBet());
+								correctInput = true;
+							} else if(answer.equals("no") || answer.equals("No")) {
+								players.get(0).setInOrOut(false);
+								correctInput = true;
+							} 
+						}
+						// Initial bet, no need to ask.
+					} else {
+						roundPotSize = decision;
+						players.get(i).betChips(decision);
+						System.out.println("Player " + (i+1) + " has wagered " + decision + " chips. Setting the pot size to " + roundPotSize + " chips.");
+					}
 				}
 				if(turnIndex == players.size()-1) {
 					turnIndex = 0;

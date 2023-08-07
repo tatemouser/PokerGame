@@ -8,11 +8,21 @@ import org.apache.commons.lang3.tuple.Pair;
 public class Player {
 	int chips;
 	boolean inOrOut;
+	int roundBet;
 	ArrayList<Pair<Integer,Integer>> cards;
 	
 	public Player(int chips, ArrayList<Pair<Integer,Integer>> cards) {
 		this.chips = chips;
 		this.cards = cards;
+		this.roundBet = 0;
+	}
+	
+	public void setRoundBet(int roundBet) {
+		this.roundBet = roundBet;
+	}
+	
+	public int getRoundBet() {
+		return roundBet;
 	}
 	
 	public void setInOrOut(boolean inOrOut) {
