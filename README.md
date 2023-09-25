@@ -5,7 +5,6 @@
 - [Project Description](#project-description)
 - [Features](#features)
 - [Installation](#installation)
-- [Usage](#usage)
 - [License](#license)
 - [Contact](#contact)
  
@@ -19,8 +18,6 @@
     
 ## Installation
     git clone https://github.com/tatemouser/NoKeyboardAlgorithm.git
-
-## Usage
 
 #### Packages:
 None. 
